@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang=\"es\">
+<head>
+<meta charset=\"utf-8\" />
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+<title>App Vóleibol - Scouting & Estadísticas</title>
+<style>
+  :root { --bg:#0f172a; --card:#111827; --muted:#cbd5e1; --accent:#22c55e; --accent2:#3b82f6; --danger:#ef4444; }
+  *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:white}
+  header{position:sticky;top:0;background:#0b1225;border-bottom:1px solid #1f2937;z-index:10}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+  h1{font-size:20px;margin:0} h2{margin:16px 0 8px;font-size:18px} h3{margin:12px 0 6px;font-size:16px}
+  nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  nav button{background:#0b1730;color:#e5e7eb;border:1px solid #1f2937;border-radius:8px;padding:8px 10px;cursor:pointer}
+  nav button.active{background:var(--accent2); border-color:var(--accent2); color:white}
+  .tab{display:none} .tab.active{display:block}
+  .grid{display:grid;gap:8px} .grid2{grid-template-columns:1fr 1fr} .grid3{grid-template-columns:repeat(3,1fr)} .grid4{grid-template-columns:repeat(4,1fr)}
+  .card{background:var(--card);border:1px solid #1f2937;border-radius:12px;padding:12px}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #334155;background:#0b1730;color:#e5e7eb}
+  table{width:100%;border-collapse:collapse} th,td{border-bottom:1px solid #1f2937;padding:8px;text-align:left;font-size:14px}
+  thead th{position:sticky;top:0;background:#0b1225}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .btn{padding:8px 12px;border-radius:8px;border:1px solid #1f2937;background:#0b1730;color:#e5e7eb;cursor:pointer}
+  .btn.primary{background:var(--accent2);border-color:var(--accent2);color:white}
+  .btn.success{background:var(--accent);border-color:var(--accent);color:#052e16}
+  .btn.danger{background:#1f2937;border-color:#1f2937;color:#fecaca}
+  small, .hint{color:var(--muted);font-size:12px}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#0b1730;border:1px solid #1f2937;color:#e5e7eb;font-size:12px}
+  .kpi{font-size:24px;font-weight:700}
+  .sticky-actions{position:sticky;bottom:0;display:flex;gap:8px;background:#0b1225;padding:10px;border-top:1px solid #1f2937}
+  @media print { header, nav, .sticky-actions { display:none } body{background:white;color:black} .card{border:0} }
+</style>
+
+<link rel='manifest' href='manifest.webmanifest'>
+<link rel='apple-touch-icon' href='icon-192.png'>
+<meta name='theme-color' content='#0b1225'>
+</head>
+<body>
+<header>
+  <div class=\"wrap\">
+    <h1>App Vóleibol — Scouting & Estadísticas</h1>
+    <nav id=\"tabs\"></nav>
+  </div>
+</header>
+
+<main class=\"wrap\">
+  <section class=\"tab active\" id=\"tab-plantel\">
+    <div class=\"card\">
+      <h2>Plantel</h2>
+      <div class=\"row\">
+        <div style=\"flex:1 1 160px\">
+          <label>Número</label>
+          <input type=\"number\" id=\"p-num\" min=\"0\" placeholder=\"Ej: 7\" />
+        </div>
+        <div style=\"flex:3 1 260px\">
+          <label>Nombre</label>
+          <input id=\"p-nom\" placeholder=\"Nombre y apellido\" />
+        </div>
+        <div style=\"flex:2 1 200px\">
+          <label>Posición (opcional)</label>
+          <input id=\"p-pos\" placeholder=\"Armadora, Opuesta, Central...\" />
+        </div>
+        <div style=\"align-self:flex-end\">
+          <button class=\"btn primary\" id=\"p-add\">Agregar al plantel</button>
+        </div>
+      </div>
+      <div style=\"margin-top:10px\"><small class=\"hint\">Sugerencia: carga tu plantel primero. Puedes editar o eliminar filas.</small></div>
+      <div style=\"margin-top:8px; overflow:auto; max-height:50vh\">
+        <table id=\"plantel-table\">
+          <thead><tr><th>#</th><th>Nombre</th><th>Posición</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class=\"tab\" id=\"tab-rot\">
+    <div class=\"card\">
+      <h2>Rotación y Saque Inicial</h2>
+      <div class=\"grid grid3\">
+        <div>
+          <label>Equipo (nosotros)</label>
+          <input id=\"team-name\" placeholder=\"Ej: Colegio IAV - Damas Sub-16\" />
+        </div>
+        <div>
+          <label>Comienza sacando</label>
+          <select id=\"start-serve\">
+            <option>Nosotros</option>
+            <option>Ellos</option>
+          </select>
+        </div>
+        <div>
+          <label>Sets máximos</label>
+          <select id=\"max-sets\">
+            <option value=\"3\">3</option>
+            <option value=\"5\" selected>5</option>
+          </select>
+        </div>
+      </div>
+      <div class=\"grid grid3\" style=\"margin-top:10px\">
+        <div><label>P1 (zona de saque)</label><select class=\"rot\" id=\"rot1\"></select></div>
+        <div><label>P2</label><select class=\"rot\" id=\"rot2\"></select></div>
+        <div><label>P3</label><select class=\"rot\" id=\"rot3\"></select></div>
+        <div><label>P4</label><select class=\"rot\" id=\"rot4\"></select></div>
+        <div><label>P5</label><select class=\"rot\" id=\"rot5\"></select></div>
+        <div><label>P6</label><select class=\"rot\" id=\"rot6\"></select></div>
+      </div>
+      <div class=\"row\" style=\"margin-top:10px\">
+        <button class=\"btn\" id=\"rot-clear\">Limpiar rotación</button>
+        <span class=\"pill\">Próximo sacador (nuestro): <b id=\"next-server\">—</b></span>
+      </div>
+    </div>
+  </section>
+
+  <section class=\"tab\" id=\"tab-reg\">
+    <div class=\"card\">
+      <h2>Registro de rallies</h2>
+      <div class=\"grid grid4\">
+        <div><label>Equipo que gana</label><select id=\"reg-team\"><option>Nosotros</option><option>Ellos</option></select></div>
+        <div><label>Jugador (nuestro)</label><select id=\"reg-player\"></select></div>
+        <div><label>Abreviatura</label><select id=\"reg-abbr\"></select></div>
+        <div><label>Set</label><select id=\"reg-set\"></select></div>
+      </div>
+      <div class=\"grid grid3\" style=\"margin-top:8px\">
+        <div><label>Side-out a favor</label><select id=\"reg-side\"><option value=\"\">—</option><option>Sí</option><option>No</option></select></div>
+        <div><label>Notas</label><input id=\"reg-notes\" placeholder=\"Ej: ajuste táctico, cambio defensivo...\" /></div>
+        <div style=\"align-self:flex-end\"><button class=\"btn success\" id=\"reg-add\">Añadir rally</button></div>
+      </div>
+      <div class=\"row\" style=\"margin:10px 0\">
+        <span class=\"pill\">Sirve este rally: <b id=\"serve-now\">—</b></span>
+        <span class=\"pill\">Servidor actual (nuestro): <b id=\"server-name\">—</b></span>
+      </div>
+      <div style=\"overflow:auto; max-height:50vh\">
+        <table id=\"reg-table\">
+          <thead><tr><th>#</th><th>Equipo</th><th>Jugador</th><th>Abrev.</th><th>Set</th><th>Side-out</th><th>Servidor (nuestro)</th><th>Notas</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class=\"sticky-actions\">
+        <button class=\"btn\" id=\"export-json\">Exportar JSON</button>
+        <button class=\"btn\" id=\"export-csv\">Exportar CSV</button>
+        <label class=\"btn\">Importar JSON<input type=\"file\" id=\"import-json\" accept=\"application/json\" style=\"display:none\"></label>
+        <span class=\"hint\">Los datos se guardan automáticamente en este navegador.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class=\"tab\" id=\"tab-sub\">
+    <div class=\"card\">
+      <h2>Cambios & Líbero</h2>
+      <div class=\"grid grid3\">
+        <div><label>Set</label><select id=\"sub-set\"></select></div>
+        <div><label>Tipo</label><select id=\"sub-type\"><option>Cambio</option><option>Líbero</option></select></div>
+        <div><label>Posición (1–6)</label><select id=\"sub-pos\"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+        <div><label>Sale (jugador)</label><select id=\"sub-out\"></select></div>
+        <div><label>Entra (jugador / líbero)</label><select id=\"sub-in\"></select></div>
+        <div style=\"align-self:flex-end\"><button class=\"btn primary\" id=\"sub-add\">Registrar</button></div>
+      </div>
+      <div style=\"overflow:auto; max-height:50vh; margin-top:10px\">
+        <table id=\"sub-table\"><thead><tr><th>#</th><th>Set</th><th>Tipo</th><th>Pos</th><th>Sale</th><th>Entra</th><th>Hora</th><th></th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <section class=\"tab\" id=\"tab-score\">
+    <div class=\"card\">
+      <h2>Marcador</h2>
+      <div class=\"row\">
+        <div class=\"card\" style=\"flex:1\">
+          <h3>Marcador actual (set seleccionado)</h3>
+          <div class=\"row\">
+            <div><span class=\"kpi\" id=\"live-nos\">0</span><div class=\"hint\">Nosotros</div></div>
+            <div style=\"width:2px;background:#1f2937;height:32px;margin:0 12px\"></div>
+            <div><span class=\"kpi\" id=\"live-ellos\">0</span><div class=\"hint\">Ellos</div></div>
+          </div>
+          <div class=\"row\" style=\"margin-top:8px\">
+            <label>Set</label><select id=\"score-set\"></select>
+          </div>
+        </div>
+        <div class=\"card\" style=\"flex:2\">
+          <h3>Marcador por set</h3>
+          <div style=\"overflow:auto; max-height:40vh\">
+            <table id=\"score-table\"><thead><tr><th>Set</th><th>Nosotros</th><th>Ellos</th><th>Ganador</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class=\"tab\" id=\"tab-stats\">
+    <div class=\"card\">
+      <h2>Estadísticas</h2>
+      <div class=\"grid grid2\">
+        <div class=\"card\">
+          <h3>Equipo (Nosotros)</h3>
+          <table id=\"team-stats\"><thead><tr><th>Métrica</th><th>Valor</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class=\"card\">
+          <h3>Por jugador</h3>
+          <div style=\"overflow:auto; max-height:50vh\">
+            <table id=\"player-stats\"><thead><tr><th>Jugador</th><th>ACE</th><th>ATA-PTO</th><th>FINTA-PTO</th><th>DUMP-PTO</th><th>BLOQ-PTO</th><th>SAQ-ERR</th><th>REC-ERR</th><th>ATA-ERR</th><th>FINTA-ERR</th><th>DUMP-ERR</th><th>BLOQ-ERR</th><th>DEF-ERR</th><th>FALTA</th><th>Total a favor</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class=\"tab\" id=\"tab-dict\">
+    <div class=\"card\">
+      <h2>Diccionario de abreviaturas</h2>
+      <div class=\"row\"><button class=\"btn\" id=\"dict-reset\">Restablecer valores por defecto</button></div>
+      <div style=\"overflow:auto;max-height:60vh;margin-top:8px\">
+        <table id=\"dict-table\"><thead><tr><th>Abreviatura</th><th>Descripción</th><th>Clasificación</th><th></th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class=\"row\" style=\"margin-top:8px\">
+        <input id=\"d-a\" placeholder=\"Abrev.\" style=\"max-width:120px\">
+        <input id=\"d-b\" placeholder=\"Descripción\" style=\"flex:2\">
+        <select id=\"d-c\"><option>Ganada</option><option>Error</option><option>Continuación</option></select>
+        <button class=\"btn primary\" id=\"d-add\">Agregar</button>
+      </div>
+    </div>
+  </section>
+
+  <section class=\"tab\" id=\"tab-report\">
+    <div class=\"card\">
+      <h2>Informe / Exportar</h2>
+      <div class=\"grid grid2\">
+        <div>
+          <h3>Exportación</h3>
+          <div class=\"row\">
+            <button class=\"btn\" id=\"export-json2\">Exportar JSON (todo)</button>
+            <button class=\"btn\" id=\"export-csv2\">Exportar CSV (Registro)</button>
+          </div>
+          <div class=\"row\" style=\"margin-top:8px\">
+            <label class=\"btn\">Importar JSON (todo)<input type=\"file\" id=\"import-json2\" accept=\"application/json\" style=\"display:none\"></label>
+            <button class=\"btn danger\" id=\"clear-all\">Borrar todo (local)</button>
+          </div>
+          <small class=\"hint\">Funciona offline y guarda en este navegador. Puedes abrirlo en el celular.</small>
+        </div>
+        <div>
+          <h3>Encabezado del Informe</h3>
+          <div class=\"grid grid2\">
+            <div><label>Fecha</label><input id=\"inf-fecha\"></div>
+            <div><label>Competencia/Evento</label><input id=\"inf-evento\"></div>
+            <div><label>Sede/Localidad</label><input id=\"inf-sede\"></div>
+            <div><label>Equipo (Nosotros)</label><input id=\"inf-team\"></div>
+            <div><label>Rival</label><input id=\"inf-rival\"></div>
+            <div><label>Entrenador</label><input id=\"inf-coach\"></div>
+          </div>
+          <div style=\"margin-top:8px\">
+            <label>Observaciones</label>
+            <textarea id=\"inf-obs\" rows=\"4\" placeholder=\"Comentarios del entrenador, aspectos destacados...\"></textarea>
+          </div>
+          <div class=\"row\" style=\"margin-top:8px\"><button class=\"btn primary\" id=\"print-report\">Imprimir / PDF</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+const SKEY=\"voleibol_app_state_v1\";
+const DEFAULT_DICT=[[\"ACE\",\"Punto directo de saque (ace)\",\"Ganada\"],[\"SAQ-ERR\",\"Error de saque\",\"Error\"],[\"REC\",\"Recepción satisfactoria (pasa a juego)\",\"Continuación\"],[\"REC-ERR\",\"Error en recepción\",\"Error\"],[\"DEF\",\"Defensa de ataque (dig) efectiva\",\"Continuación\"],[\"DEF-ERR\",\"Error en defensa (dig)\",\"Error\"],[\"ATA\",\"Ataque/remache que sigue en juego\",\"Continuación\"],[\"ATA-PTO\",\"Ataque que anota punto\",\"Ganada\"],[\"ATA-ERR\",\"Error de ataque\",\"Error\"],[\"FINTA\",\"Tip/finta que sigue en juego\",\"Continuación\"],[\"FINTA-PTO\",\"Tip/finta que anota punto\",\"Ganada\"],[\"FINTA-ERR\",\"Error en finta\",\"Error\"],[\"DUMP\",\"Pase ofensivo del armador (2° toque) en juego\",\"Continuación\"],[\"DUMP-PTO\",\"Pase ofensivo del armador que anota punto\",\"Ganada\"],[\"DUMP-ERR\",\"Error en pase ofensivo del armador\",\"Error\"],[\"BLOQ\",\"Bloqueo en juego (toca y sigue)\",\"Continuación\"],[\"BLOQ-PTO\",\"Punto directo por bloqueo\",\"Ganada\"],[\"BLOQ-ERR\",\"Error en bloqueo\",\"Error\"],[\"ASIS\",\"Asistencia que conduce a punto\",\"Ganada\"],[\"LIBRE-REC\",\"Recepción de free ball\",\"Continuación\"],[\"RET2\",\"Devolver en el 2° toque (en juego)\",\"Continuación\"],[\"RET3\",\"Devolver en el 3° toque (en juego)\",\"Continuación\"],[\"COM-MS\",\"¿De quién es? / error de comunicación\",\"Error\"],[\"FALTA\",\"Faltas: red, invasión, doble, etc.\",\"Error\"]];
+let state={ plantel:[], rotacion:{teamName:\"\", startServe:\"Nosotros\", P:[\"\",\"\",\"\",\"\",\"\",\"\"], maxSets:5 }, registro:[], cambios:[], dict:DEFAULT_DICT.slice(), informe:{fecha:\"\",evento:\"\",sede:\"\",team:\"\",rival:\"\",coach:\"\",obs:\"\"} };
+function save(){ localStorage.setItem(SKEY, JSON.stringify(state)); }
+function load(){ const s=localStorage.getItem(SKEY); if(s){ try{ state=JSON.parse(s);}catch(e){} } renderAll(); }
+const TABS=[[\"Plantel\",\"plantel\"],[\"Rotación\",\"rot\"],[\"Registro\",\"reg\"],[\"Cambios & Líbero\",\"sub\"],[\"Marcador\",\"score\"],[\"Estadísticas\",\"stats\"],[\"Diccionario\",\"dict\"],[\"Informe/Exportar\",\"report\"]];
+const tabsEl=document.getElementById(\"tabs\"); TABS.forEach(([label,key],i)=>{ const b=document.createElement(\"button\"); b.textContent=label; b.onclick=()=>setTab(key,b); if(i===0) b.classList.add(\"active\"); tabsEl.appendChild(b); });
+function setTab(key,btn){ document.querySelectorAll(\".tab\").forEach(t=>t.classList.remove(\"active\")); document.getElementById(\"tab-\"+key).classList.add(\"active\"); tabsEl.querySelectorAll(\"button\").forEach(x=>x.classList.remove(\"active\")); btn.classList.add(\"active\"); if(key===\"score\"||key===\"stats\"){ recompute(); } }
+const plantelTable=document.querySelector(\"#plantel-table tbody\"); document.getElementById(\"p-add\").onclick=()=>{ const num=document.getElementById(\"p-num\").value.trim(); const nom=document.getElementById(\"p-nom\").value.trim(); const pos=document.getElementById(\"p-pos\").value.trim(); if(!nom){alert(\"Ingresa un nombre\");return;} state.plantel.push({num,nom,pos}); document.getElementById(\"p-num\").value=\"\"\""; document.getElementById(\"p-nom\").value=\"\"\""; document.getElementById(\"p-pos\").value=\"\"\""; save(); renderPlantel(); fillPlayerSelects(); };
+function renderPlantel(){ plantelTable.innerHTML=\"\"\""; state.plantel.forEach((p,i)=>{ const tr=document.createElement(\"tr\"); tr.innerHTML=\"<td contenteditable=\\\"true\\\" data-edit=\\\"num\\\">\\"+(p.num||\"\")+\\"</td><td contenteditable=\\\"true\\\" data-edit=\\\"nom\\\">\\"+(p.nom||\"\")+\\"</td><td contenteditable=\\\"true\\\" data-edit=\\\"pos\\\">\\"+(p.pos||\"\")+\\"</td><td><button class=\\\"btn danger\\\" data-del=\\\""+"\\"+i+\\""+\\\">Eliminar</button></td>\"; plantelTable.appendChild(tr); }); }
+plantelTable.addEventListener(\"input\",(e)=>{ const td=e.target.closest(\"td\"); if(!td)return; const row=[...plantelTable.children].indexOf(td.parentElement); const key=td.getAttribute(\"data-edit\"); state.plantel[row][key]=td.textContent.trim(); save(); fillPlayerSelects(); });
+plantelTable.addEventListener(\"click\",(e)=>{ if(e.target.matches(\"[data-del]\")){ const idx=+e.target.getAttribute(\"data-del\"); state.plantel.splice(idx,1); save(); renderPlantel(); fillPlayerSelects(); }});
+document.getElementById(\"team-name\").oninput=(e)=>{ state.rotacion.teamName=e.target.value; save(); };
+document.getElementById(\"start-serve\").onchange=(e)=>{ state.rotacion.startServe=e.target.value; save(); recompute(); };
+document.getElementById(\"max-sets\").onchange=(e)=>{ state.rotacion.maxSets=+e.target.value; save(); renderSetSelectors(); };
+document.getElementById(\"rot-clear\").onclick=()=>{ state.rotacion.P=[\"\",\"\",\"\",\"\",\"\",\"\"]; save(); fillRotation(); recompute(); };
+function fillPlayerSelects(){ const opts=\"<option value=\\\"\\\"></option>\"+state.plantel.map(p=>\"<option>\"+p.nom+\"</option>\").join(\"\"); document.querySelectorAll(\".rot\").forEach(s=>{ s.innerHTML=opts;}); document.getElementById(\"reg-player\").innerHTML=\"<option value=\\\"\\\"></option>\"+state.plantel.map(p=>\"<option>\"+p.nom+\"</option>\").join(\"\"); document.getElementById(\"sub-out\").innerHTML=\"<option value=\\\"\\\"></option>\"+state.plantel.map(p=>\"<option>\"+p.nom+\"</option>\").join(\"\"); document.getElementById(\"sub-in\").innerHTML=\"<option value=\\\"\\\"></option>\"+state.plantel.map(p=>\"<option>\"+p.nom+\"</option>\").join(\"\"); }
+function fillRotation(){ for(let i=1;i<=6;i++){ const s=document.getElementById(\"rot\"+i); s.value=state.rotacion.P[i-1]||\"\"; s.onchange=(e)=>{ state.rotacion.P[i-1]=e.target.value; save(); recompute(); }; } document.getElementById(\"team-name\").value=state.rotacion.teamName||\"\"; document.getElementById(\"start-serve\").value=state.rotacion.startServe||\"Nosotros\"; document.getElementById(\"max-sets\").value=state.rotacion.maxSets||5; recompute(); }
+function renderSetSelectors(){ const n=state.rotacion.maxSets||5; const setOpts=Array.from({length:n},(_,i)=>\"<option>\"+(i+1)+\"</option>\").join(\"\"); [\"reg-set\",\"sub-set\",\"score-set\"] .forEach(id=>document.getElementById(id).innerHTML=setOpts); }
+function computeNextServer(turnIndex){ const P=state.rotacion.P; if(P.some(x=>!x)) return \"—\"; return P[(turnIndex)%6]||\"—\"; }
+const dictTable=document.querySelector(\"#dict-table tbody\"); function renderDict(){ dictTable.innerHTML=\"\"\""; state.dict.forEach((d,i)=>{ const tr=document.createElement(\"tr\"); tr.innerHTML=\"<td contenteditable data-edit=\\\"a\\\">\"+d[0]+\"</td><td contenteditable data-edit=\\\"b\\\">\"+d[1]+\"</td><td><select data-edit=\\\"c\\\"><option \"+(d[2]===\"Ganada\"?\"selected\":\"\")+\">Ganada</option><option \"+(d[2]===\"Error\"?\"selected\":\"\")+\">Error</option><option \"+(d[2]===\"Continuación\"?\"selected\":\"\")+\">Continuación</option></select></td><td><button class=\\\"btn danger\\\" data-del=\\\""+"\\"+i+\\""+\\\">Eliminar</button></td>\"; dictTable.appendChild(tr); }); document.getElementById(\"reg-abbr\").innerHTML=\"<option value=\\\"\\\"></option>\"+state.dict.map(d=>\"<option>\"+d[0]+\"</option>\").join(\"\"); }
+dictTable.addEventListener(\"input\",e=>{ const td=e.target.closest(\"td\"); if(!td)return; const row=[...dictTable.children].indexOf(td.parentElement); const key=td.getAttribute(\"data-edit\"); if(key===\"a\") state.dict[row][0]=td.textContent.trim(); if(key===\"b\") state.dict[row][1]=td.textContent.trim(); save(); renderDict(); });
+dictTable.addEventListener(\"change\",e=>{ const sel=e.target.closest(\"select\"); if(!sel)return; const row=[...dictTable.children].indexOf(sel.parentElement.parentElement); state.dict[row][2]=sel.value; save(); });
+dictTable.addEventListener(\"click\",e=>{ if(e.target.matches(\"[data-del]\")){ const idx=+e.target.getAttribute(\"data-del\"); state.dict.splice(idx,1); save(); renderDict(); }});
+document.getElementById(\"d-add\").onclick=()=>{ const a=document.getElementById(\"d-a\").value.trim(); const b=document.getElementById(\"d-b\").value.trim(); const c=document.getElementById(\"d-c\").value; if(!a){alert(\"Abreviatura requerida\"); return;} state.dict.push([a,b,c]); save(); renderDict(); document.getElementById(\"d-a\").value=\"\"\""; document.getElementById(\"d-b\").value=\"\"\""; };
+document.getElementById(\"dict-reset\").onclick=()=>{ if(confirm(\"¿Restablecer diccionario por defecto?\")){ state.dict=DEFAULT_DICT.slice(); save(); renderDict(); } };
+const regTable=document.querySelector(\"#reg-table tbody\"); document.getElementById(\"reg-add\").onclick=()=>{ const eq=document.getElementById(\"reg-team\").value; const player=document.getElementById(\"reg-player\").value; const abbr=document.getElementById(\"reg-abbr\").value; const set=+document.getElementById(\"reg-set\").value; const side=document.getElementById(\"reg-side\").value; const notes=document.getElementById(\"reg-notes\").value; if(!set){ alert(\"Selecciona el set\"); return; } if(!abbr){ alert(\"Selecciona abreviatura\"); return; } const {serveNow, serverName} = getServeForNextRally(); state.registro.push({eq, player, abbr, set, side, notes, serveNow, serverName}); document.getElementById(\"reg-notes\").value=\"\"\""; save(); renderRegistro(); recompute(); };
+function renderRegistro(){ regTable.innerHTML=\"\"\""; state.registro.forEach((r,i)=>{ const tr=document.createElement(\"tr\"); tr.innerHTML = \"<td>\"+(i+1)+\"</td><td><select data-edit=\\\"eq\\\"><option \"+(r.eq===\"Nosotros\"?\"selected\":\"\")+\">Nosotros</option><option \"+(r.eq===\"Ellos\"?\"selected\":\"\")+\">Ellos</option></select></td><td><select data-edit=\\\"player\\\"><option value=\\\"\\\"></option>\"+state.plantel.map(p=>\"<option \"+(p.nom===r.player?\"selected\":\"\")+\">\"+p.nom+\"</option>\").join(\"\")+\\"</select></td><td><select data-edit=\\\"abbr\\\">\\"+state.dict.map(d=>\"<option \"+(d[0]===r.abbr?\"selected\":\"\")+\">\"+d[0]+\"</option>\").join(\"\")+\\"</select></td><td><select data-edit=\\\"set\\\">\\"+Array.from({length:state.rotacion.maxSets||5},(_,k)=>\"<option \"+(r.set===k+1?\"selected\":\"\")+\">\"+(k+1)+\"</option>\").join(\"\")+\\"</select></td><td><select data-edit=\\\"side\\\"><option value=\\\"\\\"></option><option \"+(r.side===\"Sí\"?\"selected\":\"\")+\">Sí</option><option \"+(r.side===\"No\"?\"selected\":\"\")+\">No</option></select></td><td>\"+(r.serveNow===\"Nosotros\" ? (r.serverName or \"—\") : \"—\")+\\"</td><td contenteditable data-edit=\\\"notes\\\">\\"+(r.notes or \"\")+\\"</td><td><button class=\\\"btn danger\\\" data-del=\\\""+"\\"+i+\\""+\\\">Eliminar</button></td>\"; regTable.appendChild(tr); }); updateLiveServe(); }
+regTable.addEventListener(\"change\",(e)=>{ const tr=e.target.closest(\"tr\"); if(!tr) return; const idx=[...regTable.children].indexOf(tr); const key=e.target.getAttribute(\"data-edit\"); let val=e.target.value; if(key===\"set\") val=+val; state.registro[idx][key]=val; save(); recompute(); renderRegistro(); });
+regTable.addEventListener(\"input\",(e)=>{ const tr=e.target.closest(\"tr\"); if(!tr) return; const idx=[...regTable.children].indexOf(tr); const key=e.target.getAttribute(\"data-edit\"); state.registro[idx][key]=e.target.textContent.trim(); save(); });
+regTable.addEventListener(\"click\",(e)=>{ if(e.target.matches(\"[data-del]\")){ const idx=+e.target.getAttribute(\"data-del\"); state.registro.splice(idx,1); save(); renderRegistro(); recompute(); }});
+function getServeForNextRally(){ const start=state.rotacion.startServe||\"Nosotros\"; let serve=start; let turnIndex=0; for(let i=0;i<state.registro.length;i++){ const r=state.registro[i]; const prevServe=serve; if(prevServe===r.eq){ serve=prevServe; if(serve===\"Nosotros\"){ turnIndex=(turnIndex+1)%6; } } else { serve=(prevServe===\"Nosotros\")?\"Ellos\":\"Nosotros\"; } } const serverName = serve===\"Nosotros\" ? computeNextServer(turnIndex) : \"\"\\"; return { serveNow: serve, serverName }; }
+function updateLiveServe(){ const {serveNow, serverName}=getServeForNextRally(); document.getElementById(\"serve-now\").textContent=serveNow||\"—\"; document.getElementById(\"server-name\").textContent=serverName||\"—\"; document.getElementById(\"next-server\").textContent=serverName||\"—\"; }
+const subTable=document.querySelector(\"#sub-table tbody\"); document.getElementById(\"sub-add\").onclick=()=>{ const set=+document.getElementById(\"sub-set\").value; const type=document.getElementById(\"sub-type\").value; const pos=+document.getElementById(\"sub-pos\").value; const out=document.getElementById(\"sub-out\").value; const inn=document.getElementById(\"sub-in\").value; const time=new Date().toLocaleTimeString(); state.cambios.push({set,type,pos,out:out||\"\",in:inn||\"\",time}); save(); renderCambios(); };
+function renderCambios(){ subTable.innerHTML=\"\"\""; state.cambios.forEach((c,i)=>{ const tr=document.createElement(\"tr\"); tr.innerHTML=\"<td>\"+(i+1)+\"</td><td>\"+c.set+\"</td><td>\"+c.type+\"</td><td>\"+c.pos+\"</td><td>\"+c.out+\"</td><td>\"+c.in+\"</td><td>\"+c.time+\"</td><td><button class=\\\"btn danger\\\" data-del=\\\""+"\\"+i+\\""+\\\">Eliminar</button></td>\"; subTable.appendChild(tr); }); }
+subTable.addEventListener(\"click\",(e)=>{ if(e.target.matches(\"[data-del]\")){ const idx=+e.target.getAttribute(\"data-del\"); state.cambios.splice(idx,1); save(); renderCambios(); }});
+function recompute(){ const maxS=state.rotacion.maxSets||5; const score=Array.from({length:maxS},()=>({N:0,E:0})); state.registro.forEach(r=>{ if(!r.set) return; if(r.eq===\"Nosotros\") score[r.set-1].N++; if(r.eq===\"Ellos\") score[r.set-1].E++; }); const sel=document.getElementById(\"score-set\"); const setSel=+sel.value||1; document.getElementById(\"live-nos\").textContent=score[setSel-1]?.N||0; document.getElementById(\"live-ellos\").textContent=score[setSel-1]?.E||0; const tbody=document.querySelector(\"#score-table tbody\"); tbody.innerHTML=\"\"\""; for(let s=1;s<=maxS;s++){ const tr=document.createElement(\"tr\"); const N=score[s-1].N, E=score[s-1].E; const g=N===E?\"Empate\":(N>E?\"Nosotros\":\"Ellos\"); tr.innerHTML=\"<td>\"+s+\"</td><td>\"+N+\"</td><td>\"+E+\"</td><td>\"+((N||E)?g: \"—\")+\\"</td>\"; tbody.appendChild(tr); } const metrics=[[\"Puntos por ace\",[\"ACE\"]],[\"Puntos por ataque\",[\"ATA-PTO\"]],[\"Puntos por finta\",[\"FINTA-PTO\"]],[\"Puntos por dump\",[\"DUMP-PTO\"]],[\"Puntos por bloqueo\",[\"BLOQ-PTO\"]],[\"Errores de saque\",[\"SAQ-ERR\"]],[\"Errores de recepción\",[\"REC-ERR\"]],[\"Errores de ataque\",[\"ATA-ERR\"]],[\"Errores de finta\",[\"FINTA-ERR\"]],[\"Errores de dump\",[\"DUMP-ERR\"]],[\"Errores de bloqueo\",[\"BLOQ-ERR\"]],[\"Errores por comunicación\",[\"COM-MS\"]],[\"Faltas\",[\"FALTA\"]]]; const tBody=document.querySelector(\"#team-stats tbody\"); tBody.innerHTML=\"\"\""; metrics.forEach(m=>{ const cnt=state.registro.filter(r=>r.abbr && m[1].includes(r.abbr)).length; const tr=document.createElement(\"tr\"); tr.innerHTML=\"<td>\"+m[0]+\"</td><td>\"+cnt+\"</td>\"; tBody.appendChild(tr); }); const pBody=document.querySelector(\"#player-stats tbody\"); pBody.innerHTML=\"\"\""; const abKeys=[\"ACE\",\"ATA-PTO\",\"FINTA-PTO\",\"DUMP-PTO\",\"BLOQ-PTO\",\"SAQ-ERR\",\"REC-ERR\",\"ATA-ERR\",\"FINTA-ERR\",\"DUMP-ERR\",\"BLOQ-ERR\",\"DEF-ERR\",\"FALTA\"]; state.plantel.forEach(p=>{ const recs=state.registro.filter(r=>r.player===p.nom); const counts=Object.fromEntries(abKeys.map(k=>[k,0])); recs.forEach(r=>{ if(counts[r.abbr]!=null) counts[r.abbr]++; }); const totalFavor=counts[\"ACE\"]+counts[\"ATA-PTO\"]+counts[\"FINTA-PTO\"]+counts[\"DUMP-PTO\"]+counts[\"BLOQ-PTO\"]; const tr=document.createElement(\"tr\"); tr.innerHTML=\"<td>\"+p.nom+\"</td><td>\"+counts[\"ACE\"]+\"</td><td>\"+counts[\"ATA-PTO\"]+\"</td><td>\"+counts[\"FINTA-PTO\"]+\"</td><td>\"+counts[\"DUMP-PTO\"]+\"</td><td>\"+counts[\"BLOQ-PTO\"]+\"</td><td>\"+counts[\"SAQ-ERR\"]+\"</td><td>\"+counts[\"REC-ERR\"]+\"</td><td>\"+counts[\"ATA-ERR\"]+\"</td><td>\"+counts[\"FINTA-ERR\"]+\"</td><td>\"+counts[\"DUMP-ERR\"]+\"</td><td>\"+counts[\"BLOQ-ERR\"]+\"</td><td>\"+counts[\"DEF-ERR\"]+\"</td><td>\"+counts[\"FALTA\"]+\"</td><td>\"+totalFavor+\"</td>\"; pBody.appendChild(tr); }); }
+function updateServePreview(){ const {serveNow, serverName}=getServeForNextRally(); document.getElementById(\"serve-now\").textContent=serveNow||\"—\"; document.getElementById(\"server-name\").textContent=serverName||\"—\"; document.getElementById(\"next-server\").textContent=serverName||\"—\"; } setInterval(updateServePreview, 1000);
+function download(filename,text){ const a=document.createElement(\"a\"); a.href=URL.createObjectURL(new Blob([text],{type:\"application/octet-stream\"})); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); }
+document.getElementById(\"export-json\").onclick=()=>download(\"voleibol_registro.json\", JSON.stringify(state.registro,null,2));
+document.getElementById(\"export-json2\").onclick=()=>download(\"voleibol_app_todo.json\", JSON.stringify(state,null,2));
+document.getElementById(\"export-csv\").onclick=exportCSV; document.getElementById(\"export-csv2\").onclick=exportCSV;
+function exportCSV(){ const rows=[[\"#\",\"Equipo\",\"Jugador\",\"Abrev\",\"Set\",\"Side-out\",\"Servidor\",\"Notas\"]]; state.registro.forEach((r,i)=>{ rows.push([i+1,r.eq,r.player,r.abbr,r.set,r.side||\"\",r.serveNow===\"Nosotros\"?(r.serverName||\"\"):\"\",r.notes||\"\"]); }); const csv=rows.map(r=>r.map(x=>\"\\\""+(x if x!=None else \"\")+"\"\\\"").join(\"\")).join("\n"); download(\"registro.csv\", csv); }
+document.getElementById(\"import-json\").onchange=importRegistro; document.getElementById(\"import-json2\").onchange=importTodo;
+function importRegistro(e){ const f=e.target.files[0]; if(!f)return; const fr=new FileReader(); fr.onload=()=>{ try{ const arr=JSON.parse(fr.result); if(Array.isArray(arr)){ state.registro=arr; save(); renderRegistro(); recompute(); alert(\"Registro importado.\"); } else alert(\"Formato inválido.\"); }catch(err){ alert(\"No se pudo leer el JSON.\"); } }; fr.readAsText(f); }
+function importTodo(e){ const f=e.target.files[0]; if(!f)return; const fr=new FileReader(); fr.onload=()=>{ try{ const obj=JSON.parse(fr.result); if(obj && obj.plantel && obj.registro && obj.dict){ state=obj; save(); renderAll(); alert(\"Aplicación importada.\"); } else alert(\"JSON no parece ser un respaldo completo.\"); }catch(err){ alert(\"No se pudo leer el JSON.\"); } }; fr.readAsText(f); }
+document.getElementById(\"clear-all\").onclick=()=>{ if(confirm(\"¿Borrar todo lo almacenado localmente?\")){ localStorage.removeItem(SKEY); state={ plantel:[], rotacion:{teamName:\"\", startServe:\"Nosotros\", P:[\"\",\"\",\"\",\"\",\"\",\"\"], maxSets:5 }, registro:[], cambios:[], dict:DEFAULT_DICT.slice(), informe:{fecha:\"\",evento:\"\",sede:\"\",team:\"\",rival:\"\",coach:\"\",obs:\"\"} }; save(); renderAll(); } };
+function bindInforme(){ [\"fecha\",\"evento\",\"sede\",\"team\",\"rival\",\"coach\",\"obs\"] .forEach(k=>{ const el=document.getElementById(\"inf-\"+k); el.value=state.informe[k]||\"\"; el.oninput=(e)=>{ state.informe[k]=e.target.value; save(); }; }); if(!state.informe.team && state.rotacion.teamName){ document.getElementById(\"inf-team\").value=state.rotacion.teamName; state.informe.team=state.rotacion.teamName; save(); } document.getElementById(\"print-report\").onclick=()=>window.print(); }
+function renderAll(){ renderPlantel(); fillPlayerSelects(); fillRotation(); renderSetSelectors(); renderDict(); renderRegistro(); renderCambios(); updateServePreview(); document.getElementById(\"score-set\").onchange=recompute; document.getElementById(\"score-set\").value=\"1\"; bindInforme(); recompute(); }
+load();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js');
+  });
+}
+</script>
+</body>
+</html>
